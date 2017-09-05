@@ -1,4 +1,4 @@
-add_executable (hydraTest
+add_executable (helloWorld
         main.cpp
         SceneDelegate.cpp SceneDelegate.h)
 
@@ -9,14 +9,14 @@ set(USD_ROOT_DIR /home/don/dev/USD-install/)
 set(USD_LIB_DIR ${USD_ROOT_DIR}/lib/)
 set(USD_INC_DIR ${USD_ROOT_DIR}/include/)
 
-target_include_directories(hydraTest
+target_include_directories(helloWorld
         PUBLIC
             ${USD_INC_DIR}
             ${PYTHON_INCLUDE_PATH}
         )
 
 target_link_libraries(
-        hydraTest
+        helloWorld
                 ${USD_LIB_DIR}/libhd.so
                 ${USD_LIB_DIR}/libhdStream.so
                 ${USD_LIB_DIR}/libhdSt.so
