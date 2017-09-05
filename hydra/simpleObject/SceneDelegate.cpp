@@ -10,6 +10,8 @@
 #include "pxr/base/gf/frustum.h"
 #include "pxr/base/vt/array.h"
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
 
 SceneDelegate::SceneDelegate(pxr::HdRenderIndex *parentIndex, pxr::SdfPath const &delegateID)
  : pxr::HdSceneDelegate(parentIndex, delegateID)
@@ -17,11 +19,23 @@ SceneDelegate::SceneDelegate(pxr::HdRenderIndex *parentIndex, pxr::SdfPath const
 	cameraPath = pxr::SdfPath("/camera");
 	GetRenderIndex().InsertSprim(pxr::HdPrimTypeTokens->camera, this, cameraPath);
 	pxr::GfFrustum frustum;
-	frustum.SetPosition(pxr::GfVec3d(0, 0, 3));
+	frustum.SetPosition(pxr::GfVec3d(0, 2.5, 9.99));
 	SetCamera(frustum.ComputeViewMatrix(), frustum.ComputeProjectionMatrix());
 
-	GetRenderIndex().InsertRprim(pxr::HdPrimTypeTokens->mesh, this, pxr::SdfPath("/triangle") );
+	// load the .obj file
 
+	std::string error;
+
+	bool result = tinyobj::LoadObj(&attribs, &shapes, &materials, &error, "teapot/teapot.obj");
+	std::cout << result  << std::endl;
+
+	std::cout << "num positions:" << attribs.vertices.size() / 3 << std::endl;
+
+	pxr::SdfPath path ( std::string("/oject") );
+	GetRenderIndex().InsertRprim(pxr::HdPrimTypeTokens->mesh, this, path);
+
+	normals = attribs.normals.size() > 0;
+	uvs = attribs.texcoords.size() > 0;
 }
 
 void
@@ -80,9 +94,11 @@ pxr::VtValue SceneDelegate::Get(pxr::SdfPath const &id, const pxr::TfToken &key)
 	{
 		pxr::VtVec3fArray points;
 
-		points.push_back(pxr::GfVec3f(0,0,0));
-		points.push_back(pxr::GfVec3f(1,0,0));
-		points.push_back(pxr::GfVec3f(0,1,0));
+		for (size_t v = 0; v < attribs.vertices.size() / 3; ++v)
+		{
+			points.push_back(0.1 * pxr::GfVec3f(attribs.vertices[v * 3 + 0], attribs.vertices[v * 3 + 1], attribs.vertices[v* 3 + 2]));
+		}
+
 		return pxr::VtValue(points);
 	}
 }
@@ -95,6 +111,7 @@ bool SceneDelegate::GetVisible(pxr::SdfPath const &id)
 
 pxr::GfRange3d SceneDelegate::GetExtent(pxr::SdfPath const &id)
 {
+	// todo return .obj BBox.
 	std::cout << "[" << id.GetString() <<"][Extent]" << std::endl;
 	return pxr::GfRange3d(pxr::GfVec3d(-1,-1,-1), pxr::GfVec3d(1,1,1));
 }
@@ -107,16 +124,31 @@ pxr::GfMatrix4d SceneDelegate::GetTransform(pxr::SdfPath const &id)
 
 pxr::HdMeshTopology SceneDelegate::GetMeshTopology(pxr::SdfPath const &id)
 {
+	// todo return correct obj topology
 	std::cout << "[" << id.GetString() <<"][Topology]" << std::endl;
+
 	pxr::VtArray<int> vertCountsPerFace;
 	pxr::VtArray<int> verts;
-	vertCountsPerFace.push_back(3);
-	verts.push_back(0);
-	verts.push_back(1);
-	verts.push_back(2);
+
+	for(size_t s = 0; s < shapes.size(); ++s)
+	{
+		for (size_t i = 0; i < shapes[s].mesh.indices.size(); ++i)
+		{
+			verts.push_back( shapes[s].mesh.indices[i].vertex_index );
+		}
+
+		for (size_t i = 0; i < shapes[s].mesh.num_face_vertices.size(); ++i )
+		{
+			vertCountsPerFace.push_back( shapes[s].mesh.num_face_vertices[i] );
+		}
+	}
+
+	std::cout << "\tnum polygons: " << verts.size() << std::endl;
+	std::cout << "\tnum indices: " << vertCountsPerFace.size() << std::endl;
 
 	pxr::HdMeshTopology triangleTopology(pxr::PxOsdOpenSubdivTokens->none, pxr::HdTokens->rightHanded, vertCountsPerFace, verts);
 	return triangleTopology;
+
 }
 
 pxr::TfTokenVector SceneDelegate::GetPrimVarVertexNames(pxr::SdfPath const &id)

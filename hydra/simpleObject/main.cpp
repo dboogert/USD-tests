@@ -23,7 +23,6 @@
 #include "SceneDelegate.h"
 
 
-
 class DebugWindow : public pxr::GarchGLDebugWindow
 {
 public:
@@ -48,7 +47,7 @@ public:
 		// Create two tasks (render setup & render) to the RenderIndex
 		sceneDelegate->AddRenderSetupTask(renderSetupId);
 		sceneDelegate->AddRenderTask(renderId);
-		
+
 		// I can move these into return values for SceneDelegate::AddRenderSetupTask && AddRenderTask functions 
 		pxr::HdTaskSharedPtr renderSetupTask = index->GetTask(renderSetupId);
 		pxr::HdTaskSharedPtr renderTask      = index->GetTask(renderId);
@@ -84,7 +83,7 @@ int main(int argc, char** argv)
 	}
 
 	// create a window, GLContext & extensions
-	DebugWindow window("hydra test", 1280, 720);
+	DebugWindow window("hydra - simple Object", 1280, 720);
 	window.Init();
 	bool glewInit = pxr::GlfGlewInit();
 	std::cout << "glew:" << glewInit << std::endl;

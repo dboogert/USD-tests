@@ -1,13 +1,13 @@
 #pragma once
 
 #include "pxr/imaging/hd/sceneDelegate.h"
-
+#include "tiny_obj_loader.h"
 
 class SceneDelegate : public pxr::HdSceneDelegate
 {
 public:
 	SceneDelegate(pxr::HdRenderIndex *parentIndex, pxr::SdfPath const& delegateID);
-
+	
 	void AddRenderTask(pxr::SdfPath const &id);
 	void AddRenderSetupTask(pxr::SdfPath const &id);
 
@@ -31,6 +31,12 @@ private:
 	typedef pxr::TfHashMap<pxr::SdfPath, _ValueCache, pxr::SdfPath::Hash> _ValueCacheMap;
 	_ValueCacheMap _valueCacheMap;
 
+	tinyobj::attrib_t attribs;
+	std::vector<tinyobj::shape_t> shapes;
+	std::vector<tinyobj::material_t> materials;
+
+	bool normals;
+	bool uvs;
 	// location of Camera (setup in ctor)
 	pxr::SdfPath cameraPath;
 };
