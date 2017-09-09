@@ -5,9 +5,7 @@ add_executable (simpleObject
 find_package(PythonLibs)
 find_package(OpenGL)
 
-set(USD_ROOT_DIR /home/don/dev/USD-install/)
-set(USD_LIB_DIR ${USD_ROOT_DIR}/lib/)
-set(USD_INC_DIR ${USD_ROOT_DIR}/include/)
+
 
 target_include_directories(simpleObject
         PUBLIC
