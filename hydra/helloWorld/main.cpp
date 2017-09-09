@@ -29,8 +29,6 @@ class DebugWindow : public pxr::GarchGLDebugWindow
 public:
 	DebugWindow(const char *title, int width, int height) : GarchGLDebugWindow(title, width, height)
 	{
-		glViewport(0, 0, width, height);
-
 		// create a RenderDelegate which is required for the RenderIndex
 		renderDelegate.reset( new pxr::HdStRenderDelegate() );
 
