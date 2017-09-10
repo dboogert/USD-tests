@@ -19,7 +19,7 @@ SceneDelegate::SceneDelegate(pxr::HdRenderIndex *parentIndex, pxr::SdfPath const
 	cameraPath = pxr::SdfPath("/camera");
 	GetRenderIndex().InsertSprim(pxr::HdPrimTypeTokens->camera, this, cameraPath);
 	pxr::GfFrustum frustum;
-	frustum.SetPosition(pxr::GfVec3d(0, 1.5, 5));
+	frustum.SetPosition(pxr::GfVec3d(0, 1.5, 250.0));
 	frustum.SetNearFar(pxr::GfRange1d(0.1, 1000.0));
 	frustum.SetRotation(pxr::GfRotation(pxr::GfVec3d(1, 0, 0), 0));
 	SetCamera(frustum.ComputeViewMatrix(), frustum.ComputeProjectionMatrix());
@@ -28,7 +28,7 @@ SceneDelegate::SceneDelegate(pxr::HdRenderIndex *parentIndex, pxr::SdfPath const
 
 	std::string error;
 
-	bool result = tinyobj::LoadObj(&attribs, &shapes, &materials, &error, "cube/cube.obj");
+	bool result = tinyobj::LoadObj(&attribs, &shapes, &materials, &error, "teapot/teapot.obj");
 	std::cout << result  << std::endl;
 
 	std::cout << "num positions:" << attribs.vertices.size() / 3 << std::endl;
@@ -55,7 +55,6 @@ SceneDelegate::SceneDelegate(pxr::HdRenderIndex *parentIndex, pxr::SdfPath const
 			{
 				int normalIndex = shapes[s].mesh.indices[i].normal_index;
 				pxr::GfVec3f n( attribs.normals[3 * normalIndex+0], attribs.normals[3 * normalIndex+1], attribs.normals[3 * normalIndex+2]);
-
 				normals.push_back(n);
 			}
 		}
@@ -84,6 +83,7 @@ SceneDelegate::AddRenderSetupTask(pxr::SdfPath const &id)
 	_ValueCache &cache = _valueCacheMap[id];
 	pxr::HdxRenderTaskParams params;
 	params.camera = cameraPath;
+	params.enableLighting = true;
 	params.viewport = pxr::GfVec4f(0, 0, 512, 512);
 	cache[pxr::HdTokens->children] = pxr::VtValue(pxr::SdfPathVector());
 	cache[pxr::HdTokens->params] = pxr::VtValue(params);
