@@ -19,23 +19,52 @@ SceneDelegate::SceneDelegate(pxr::HdRenderIndex *parentIndex, pxr::SdfPath const
 	cameraPath = pxr::SdfPath("/camera");
 	GetRenderIndex().InsertSprim(pxr::HdPrimTypeTokens->camera, this, cameraPath);
 	pxr::GfFrustum frustum;
-	frustum.SetPosition(pxr::GfVec3d(0, 2.5, 9.99));
+	frustum.SetPosition(pxr::GfVec3d(0, 1.5, 5));
+	frustum.SetNearFar(pxr::GfRange1d(0.1, 1000.0));
+	frustum.SetRotation(pxr::GfRotation(pxr::GfVec3d(1, 0, 0), 0));
 	SetCamera(frustum.ComputeViewMatrix(), frustum.ComputeProjectionMatrix());
 
 	// load the .obj file
 
 	std::string error;
 
-	bool result = tinyobj::LoadObj(&attribs, &shapes, &materials, &error, "teapot/teapot.obj");
+	bool result = tinyobj::LoadObj(&attribs, &shapes, &materials, &error, "cube/cube.obj");
 	std::cout << result  << std::endl;
 
 	std::cout << "num positions:" << attribs.vertices.size() / 3 << std::endl;
 
-	pxr::SdfPath path ( std::string("/oject") );
+	pxr::SdfPath path ( std::string("/object") );
 	GetRenderIndex().InsertRprim(pxr::HdPrimTypeTokens->mesh, this, path);
 
-	normals = attribs.normals.size() > 0;
-	uvs = attribs.texcoords.size() > 0;
+	hasNormals = attribs.normals.size() > 0;
+	hasUVs = attribs.texcoords.size() > 0;
+
+
+	for (size_t v = 0; v < attribs.vertices.size() / 3; ++v)
+	{
+		points.push_back( pxr::GfVec3f(attribs.vertices[v * 3 + 0], attribs.vertices[v * 3 + 1], attribs.vertices[v* 3 + 2]));
+	}
+
+	for(size_t s = 0; s < shapes.size(); ++s)
+	{
+		for (size_t i = 0; i < shapes[s].mesh.indices.size(); ++i)
+		{
+			verts.push_back( shapes[s].mesh.indices[i].vertex_index );
+
+			if (hasNormals)
+			{
+				int normalIndex = shapes[s].mesh.indices[i].normal_index;
+				pxr::GfVec3f n( attribs.normals[3 * normalIndex+0], attribs.normals[3 * normalIndex+1], attribs.normals[3 * normalIndex+2]);
+
+				normals.push_back(n);
+			}
+		}
+
+		for (size_t i = 0; i < shapes[s].mesh.num_face_vertices.size(); ++i )
+		{
+			vertCountsPerFace.push_back( shapes[s].mesh.num_face_vertices[i] );
+		}
+	}
 }
 
 void
@@ -92,15 +121,15 @@ pxr::VtValue SceneDelegate::Get(pxr::SdfPath const &id, const pxr::TfToken &key)
 
 	if (key == pxr::HdTokens->points)
 	{
-		pxr::VtVec3fArray points;
-
-		for (size_t v = 0; v < attribs.vertices.size() / 3; ++v)
-		{
-			points.push_back(0.1 * pxr::GfVec3f(attribs.vertices[v * 3 + 0], attribs.vertices[v * 3 + 1], attribs.vertices[v* 3 + 2]));
-		}
-
 		return pxr::VtValue(points);
 	}
+
+	if (key == pxr::HdTokens->normals)
+	{
+		return pxr::VtValue(normals);
+	}
+
+	return pxr::VtValue();
 }
 
 bool SceneDelegate::GetVisible(pxr::SdfPath const &id)
@@ -127,22 +156,6 @@ pxr::HdMeshTopology SceneDelegate::GetMeshTopology(pxr::SdfPath const &id)
 	// todo return correct obj topology
 	std::cout << "[" << id.GetString() <<"][Topology]" << std::endl;
 
-	pxr::VtArray<int> vertCountsPerFace;
-	pxr::VtArray<int> verts;
-
-	for(size_t s = 0; s < shapes.size(); ++s)
-	{
-		for (size_t i = 0; i < shapes[s].mesh.indices.size(); ++i)
-		{
-			verts.push_back( shapes[s].mesh.indices[i].vertex_index );
-		}
-
-		for (size_t i = 0; i < shapes[s].mesh.num_face_vertices.size(); ++i )
-		{
-			vertCountsPerFace.push_back( shapes[s].mesh.num_face_vertices[i] );
-		}
-	}
-
 	std::cout << "\tnum polygons: " << verts.size() << std::endl;
 	std::cout << "\tnum indices: " << vertCountsPerFace.size() << std::endl;
 
@@ -158,5 +171,39 @@ pxr::TfTokenVector SceneDelegate::GetPrimVarVertexNames(pxr::SdfPath const &id)
 	pxr::TfTokenVector names;
 	names.push_back(pxr::HdTokens->points);
 
+	return names;
+}
+
+pxr::TfTokenVector SceneDelegate::GetPrimVarVaryingNames(pxr::SdfPath const& id)
+{
+	pxr::TfTokenVector names;
+	return names;
+}
+
+pxr::TfTokenVector SceneDelegate::GetPrimVarFacevaryingNames(pxr::SdfPath const& id)
+{
+	pxr::TfTokenVector names;
+	if (hasNormals)
+	{
+		names.push_back(pxr::HdTokens->normals);
+	}
+
+	if (hasUVs)
+	{
+		//names.push_back(pxr::HdTokens->surfaceShaderParams);
+	}
+
+	return names;
+}
+
+pxr::TfTokenVector SceneDelegate::GetPrimVarUniformNames(pxr::SdfPath const& id)
+{
+	pxr::TfTokenVector names;
+	return names;
+}
+
+pxr::TfTokenVector SceneDelegate::GetPrimVarConstantNames(pxr::SdfPath const& id)
+{
+	pxr::TfTokenVector names;
 	return names;
 }
