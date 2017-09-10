@@ -14,6 +14,12 @@ Project Structure
     * simpleObject *simple .obj - lambert lit solid color object*
         * [tinyObj](https://github.com/syoyo/tinyobjloader)
         * [teapot](http://g3d.cs.williams.edu/g3d/data10/common/model/teapot/teapot.zip) 
+    * shader [*triangle with a solid color shader assigned*](hydra/shader)
+        * lighting has to be enabled for the shader to be acivated
+    * texturing [*quad with a texture*](hydra/texturing)
+        * Trying to use **pxr::GlfTextureRegistry::GetInstance().GetTextureHandle(pxr::TfToken("default.png"));**
+        * looks like the plugin required for texture loading isn't loaded
+        * What is the difference between **GetTextureResourceID** & **GetTextureResource**
     * deformation
     * displacement
     * dyanmicScene
