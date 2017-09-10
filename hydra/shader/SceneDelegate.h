@@ -24,6 +24,7 @@ public:
 
 	pxr::HdMeshTopology GetMeshTopology(pxr::SdfPath const &id) override;
 	pxr::TfTokenVector GetPrimVarVertexNames(pxr::SdfPath const &id) override;
+	pxr::TfTokenVector GetPrimVarConstantNames(pxr::SdfPath const& id) override;
 
 	std::string GetSurfaceShaderSource(pxr::SdfPath const &shaderId) override;
 	std::string GetDisplacementShaderSource(pxr::SdfPath const &shaderId) override;

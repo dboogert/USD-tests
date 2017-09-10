@@ -90,6 +90,11 @@ pxr::VtValue SceneDelegate::Get(pxr::SdfPath const &id, const pxr::TfToken &key)
 		return pxr::VtValue(points);
 	}
 
+	if (key == pxr::HdTokens->color)
+	{
+		return pxr::VtValue(pxr::GfVec4f(0.5f, 0.5f, 0.5f, 1.0));
+	}
+
 	return pxr::VtValue();
 }
 
@@ -135,11 +140,18 @@ pxr::TfTokenVector SceneDelegate::GetPrimVarVertexNames(pxr::SdfPath const &id)
 	return names;
 }
 
+pxr::TfTokenVector SceneDelegate::GetPrimVarConstantNames(pxr::SdfPath const& id)
+{
+	pxr::TfTokenVector names;
+	names.push_back(pxr::HdTokens->color);
+	return names;
+}
+
 std::string SceneDelegate::GetSurfaceShaderSource(pxr::SdfPath const &shaderId)
 {
 	std::cout << "[" << shaderId.GetString() <<"][GetSurfaceShaderSource]" << std::endl;
 
-	return "vec4 surfaceShader(vec4 Peye, vec3 Neye, vec4 color, vec4 patchCoord) { return vec4(1,0.5,1,1) * color; }";
+	return "vec4 surfaceShader(vec4 Peye, vec3 Neye, vec4 color, vec4 patchCoord) { return vec4(0.5,0.0, 0.0,1) * color; }";
 }
 
 std::string SceneDelegate::GetDisplacementShaderSource(pxr::SdfPath const &shaderId)
