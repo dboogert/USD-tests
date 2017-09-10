@@ -44,6 +44,7 @@ SceneDelegate::AddRenderSetupTask(pxr::SdfPath const &id)
 	GetRenderIndex().InsertTask<pxr::HdxRenderSetupTask>(this, id);
 	_ValueCache &cache = _valueCacheMap[id];
 	pxr::HdxRenderTaskParams params;
+	params.enableLighting = true;
 	params.camera = cameraPath;
 	params.viewport = pxr::GfVec4f(0, 0, 512, 512);
 	cache[pxr::HdTokens->children] = pxr::VtValue(pxr::SdfPathVector());
@@ -151,7 +152,7 @@ std::string SceneDelegate::GetSurfaceShaderSource(pxr::SdfPath const &shaderId)
 {
 	std::cout << "[" << shaderId.GetString() <<"][GetSurfaceShaderSource]" << std::endl;
 
-	return "vec4 surfaceShader(vec4 Peye, vec3 Neye, vec4 color, vec4 patchCoord) { return vec4(0.5,0.0, 0.0,1) * color; }";
+	return "vec4 surfaceShader(vec4 Peye, vec3 Neye, vec4 color, vec4 patchCoord) { return vec4(0.2, 0.5, 0.2, 1) * color; }";
 }
 
 std::string SceneDelegate::GetDisplacementShaderSource(pxr::SdfPath const &shaderId)
@@ -163,18 +164,13 @@ std::string SceneDelegate::GetDisplacementShaderSource(pxr::SdfPath const &shade
 pxr::VtValue SceneDelegate::GetSurfaceShaderParamValue(pxr::SdfPath const &shaderId, const pxr::TfToken &paramName)
 {
 	std::cout << "[" << shaderId.GetString() << "." << paramName <<"][GetSurfaceShaderParamValue]" << std::endl;
-	pxr::VtValue value (1.0f);
-	return  value;
+	return  pxr::VtValue();
 }
 
 pxr::HdShaderParamVector SceneDelegate::GetSurfaceShaderParams(pxr::SdfPath const &shaderId)
 {
 	std::cout << "[" << shaderId.GetString() <<"][GetSurfaceShaderParams]" << std::endl;
 	pxr::HdShaderParamVector r;
-	pxr::VtValue value (1.0f);
-	pxr::HdShaderParam param(pxr::HdShaderTokens->lightingBlendAmount, value);
-
-	r.push_back(param);
 	return r;
 }
 
