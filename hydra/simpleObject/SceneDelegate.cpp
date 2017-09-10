@@ -129,6 +129,11 @@ pxr::VtValue SceneDelegate::Get(pxr::SdfPath const &id, const pxr::TfToken &key)
 		return pxr::VtValue(normals);
 	}
 
+	if (key == pxr::HdTokens->color)
+	{
+		return pxr::VtValue(pxr::GfVec4f(0.2, 0.4, 0.2, 1.0));
+	}
+
 	return pxr::VtValue();
 }
 
@@ -205,5 +210,6 @@ pxr::TfTokenVector SceneDelegate::GetPrimVarUniformNames(pxr::SdfPath const& id)
 pxr::TfTokenVector SceneDelegate::GetPrimVarConstantNames(pxr::SdfPath const& id)
 {
 	pxr::TfTokenVector names;
+	names.push_back(pxr::HdTokens->color);
 	return names;
 }
